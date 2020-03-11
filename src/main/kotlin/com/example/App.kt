@@ -3,12 +3,17 @@
  */
 package com.example
 
+import kotlinx.coroutines.*
 import org.apache.pulsar.client.api.*
+import java.time.Duration
 
 
 private const val SERVICE_URL = "pulsar://localhost:6650"
 private const val TOPIC_NAME = "test-topic-001"
 private const val SUBSCRIPTION_NAME = "test-subscription-001"
+private typealias PulsarProducer = Producer<ByteArray>
+private typealias PulsarConsumer = Consumer<ByteArray>
+
 
 object App {
     private val client: PulsarClient by lazy {
@@ -17,53 +22,69 @@ object App {
                 .build()
     }
 
-    private val producer: Producer<ByteArray> by lazy {
+    private val producer1: PulsarProducer by lazy {
         client.newProducer()
                 .topic(TOPIC_NAME)
                 .compressionType(CompressionType.LZ4)
                 .create()
     }
 
-    fun run() {
-        println("${this::class.qualifiedName}.run()")
-
-        println("produce -> $SERVICE_URL/$TOPIC_NAME ...")
-        produce()
-
-        consume(subscriptionType = SubscriptionType.Shared)
-    }
-
-    fun produce() {
-        (1..5).forEach { i: Int ->
-            val content = "hi-pulsar-${i}"
-            val msg = producer.newMessage()
-                    .value(content.toByteArray())
-            //.deliverAfter(5, TimeUnit.SECONDS)
-            //.deliverAt((Instant.now() + Duration.ofDays(1)).epochSecond)
-
-            val messageId: MessageId = msg.send()
-            println("sent message. $messageId")
-        }
-    }
-
-    private fun consume(subscriptionType: SubscriptionType) {
-        val consumer: Consumer<ByteArray> = client.newConsumer()
+    private val consumer1: PulsarConsumer by lazy {
+        client.newConsumer()
                 .topic(TOPIC_NAME)
                 .subscriptionType(SubscriptionType.Shared)
                 .subscriptionName(SUBSCRIPTION_NAME)
                 .subscribe()
+    }
 
-        do { // Wait for a message
-            println("receive() ...")
-            val msg = consumer.receive()
-            println("received ${msg.messageId}")
-            val content = String(msg.data)
-            println("Message received: $content")
+    fun run() {
+        println("${this::class.qualifiedName}.run()")
 
-            // Acknowledge the message so that it can be deleted by the message broker
-            consumer.acknowledge(msg)
-            println("Ack sent.")
-        } while (true)
+        launchProducerJob(producer1)
+        println("producer job launched.")
+        launchConsumerJob(consumer1)
+        println("consumer job launched.")
+
+        println("${this::class.qualifiedName}.run(): done.")
+    }
+
+
+    private fun launchProducerJob(producer: PulsarProducer): Job = runBlocking {
+        GlobalScope.launch {
+            while (isActive) {
+                println("produce -> $SERVICE_URL/$TOPIC_NAME ...")
+                (1..5).forEach { i: Int ->
+                    val content = "hi-pulsar-${i}"
+                    val msg = producer.newMessage()
+                            .value(content.toByteArray())
+                    //.deliverAfter(5, TimeUnit.SECONDS)
+                    //.deliverAt((Instant.now() + Duration.ofDays(1)).epochSecond)
+
+                    val messageId: MessageId = msg.send()
+                    println("sent message. $messageId")
+                }
+
+                println("produce: IDLE ...")
+                delay(Duration.ofSeconds(1).toMillis())
+            }
+        }
+    }
+
+    private fun launchConsumerJob(consumer: PulsarConsumer): Job = runBlocking {
+        GlobalScope.launch {
+            while (isActive) {
+                // Wait for a message
+                println("receive() from: $SERVICE_URL/$TOPIC_NAME ...")
+                val msg = consumer.receive()
+                println("received ${msg.messageId}")
+                val content = String(msg.data)
+                println("Message received: $content")
+
+                // Acknowledge the message so that it can be deleted by the message broker
+                consumer.acknowledge(msg)
+                println("Ack sent.")
+            }
+        }
     }
 }
 

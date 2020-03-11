@@ -22,7 +22,9 @@ dependencies {
     // kotlin
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
-     // logging
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
+
+    // logging
     implementation("io.github.microutils:kotlin-logging:1.7.+")
     implementation("org.slf4j:slf4j-simple:1.7.26")
     // pulsar
