@@ -22,6 +22,10 @@ dependencies {
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
+    val pulsarVersion="2.5.0"
+    implementation("org.apache.pulsar:pulsar-client:$pulsarVersion")
+
+
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 

@@ -11,3 +11,12 @@ tutorials:
 ```
 $ docker-compose -f docker/pulsar.yml up
 ```
+
+# java sdk
+- https://mvnrepository.com/artifact/org.apache.pulsar/pulsar-client
+- https://pulsar.apache.org/docs/en/2.2.1/client-libraries-java/
+- client: org.apache.pulsar:pulsar-client:2.x.x
+
+## pulsar admin api (REST, cli, java sdk)
+- https://pulsar.apache.org/docs/en/2.2.1/admin-api-overview/
+
