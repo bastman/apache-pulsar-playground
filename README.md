@@ -10,6 +10,9 @@ tutorials:
 
 ```
 $ docker-compose -f docker/pulsar.yml up
+
+# a simple producer-consumer example is located in src/main/kotlin
+
 ```
 
 # java sdk
