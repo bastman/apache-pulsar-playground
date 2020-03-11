@@ -1,3 +1,5 @@
+# OSX
+.DS_Store
 
 # IDEA
 .idea/
@@ -5,7 +7,9 @@
 *.ipr
 out/
 
-# OPX
-.DS_Store
+# gradle
+.gradle/
+
+
 
 
