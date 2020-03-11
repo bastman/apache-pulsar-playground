@@ -54,13 +54,15 @@ object App {
                 .subscribe()
 
         do { // Wait for a message
+            println("receive() ...")
             val msg = consumer.receive()
-            println(
-                    "Message received: ${msg.data.toString()}"
-            )
+            println("received ${msg.messageId}")
+            val content = String(msg.data)
+            println("Message received: $content")
 
             // Acknowledge the message so that it can be deleted by the message broker
             consumer.acknowledge(msg)
+            println("Ack sent.")
         } while (true)
     }
 }
