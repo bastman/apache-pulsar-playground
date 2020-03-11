@@ -3,13 +3,68 @@
  */
 package com.example
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello world."
+import org.apache.pulsar.client.api.*
+
+
+private const val SERVICE_URL = "pulsar://localhost:6650"
+private const val TOPIC_NAME = "test-topic-001"
+private const val SUBSCRIPTION_NAME = "test-subscription-001"
+
+object App {
+    private val client: PulsarClient by lazy {
+        PulsarClient.builder()
+                .serviceUrl(SERVICE_URL)
+                .build()
+    }
+
+    private val producer: Producer<ByteArray> by lazy {
+        client.newProducer()
+                .topic(TOPIC_NAME)
+                .compressionType(CompressionType.LZ4)
+                .create()
+    }
+
+    fun run() {
+        println("${this::class.qualifiedName}.run()")
+
+        println("produce -> $SERVICE_URL/$TOPIC_NAME ...")
+        produce()
+
+        consume(subscriptionType = SubscriptionType.Shared)
+    }
+
+    fun produce() {
+        (1..5).forEach { i: Int ->
+            val content = "hi-pulsar-${i}"
+            val msg = producer.newMessage()
+                    .value(content.toByteArray())
+            //.deliverAfter(5, TimeUnit.SECONDS)
+            //.deliverAt((Instant.now() + Duration.ofDays(1)).epochSecond)
+
+            val messageId: MessageId = msg.send()
+            println("sent message. $messageId")
         }
+    }
+
+    private fun consume(subscriptionType: SubscriptionType) {
+        val consumer: Consumer<ByteArray> = client.newConsumer()
+                .topic(TOPIC_NAME)
+                .subscriptionType(SubscriptionType.Shared)
+                .subscriptionName(SUBSCRIPTION_NAME)
+                .subscribe()
+
+        do { // Wait for a message
+            val msg = consumer.receive()
+            println(
+                    "Message received: ${msg.data.toString()}"
+            )
+
+            // Acknowledge the message so that it can be deleted by the message broker
+            consumer.acknowledge(msg)
+        } while (true)
+    }
 }
 
 fun main(args: Array<String>) {
-    println(App().greeting)
+    App.run()
 }

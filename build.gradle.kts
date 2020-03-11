@@ -6,7 +6,7 @@
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.61"
 
     // Apply the application plugin to add support for building a CLI application.
     application
@@ -19,24 +19,40 @@ repositories {
 }
 
 dependencies {
-    // Align versions of all Kotlin components
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-
+    // kotlin
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
+     // logging
+    implementation("io.github.microutils:kotlin-logging:1.7.+")
+    implementation("org.slf4j:slf4j-simple:1.7.26")
+    // pulsar
     val pulsarVersion="2.5.0"
     implementation("org.apache.pulsar:pulsar-client:$pulsarVersion")
 
 
-    // Use the Kotlin JDK 8 standard library.
+    // test
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
-    // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-
-    // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 }
 
 application {
     // Define the main class for the application.
     mainClassName = "com.example.AppKt"
+}
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks {
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            apiVersion = "1.3"
+            languageVersion = "1.3"
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+        }
+    }
 }
