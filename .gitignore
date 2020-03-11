@@ -1,0 +1,11 @@
+
+# IDEA
+.idea/
+.*.iml
+*.ipr
+out/
+
+# OPX
+.DS_Store
+
+
