@@ -8,8 +8,6 @@
  */
 
 rootProject.name = "apache-pulsar-playground"
-include("hello-pulsar")
-
 
 pluginManagement {
     // see: https://github.com/ilya40umov/KotLink/blob/master/settings.gradle.kts
@@ -29,3 +27,10 @@ pluginManagement {
     }
 }
 
+
+// gradle modules
+
+include("examples:avro")
+findProject(":examples:avro")?.name = "avro"
+include("examples:quickstart")
+findProject(":examples:quickstart")?.name = "quickstart"
