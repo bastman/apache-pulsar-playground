@@ -11,14 +11,11 @@ import java.time.Duration
 
 private const val SERVICE_URL = "pulsar://localhost:6650"
 //private const val TOPIC_NAME = "my-property/my-ns/test-topic-jsonschema-001"
-private const val TOPIC_NAME = "test-topic-avroschema-001"
+private const val TOPIC_NAME = "test-topic-jsonschema-001"
 private const val SUBSCRIPTION_NAME = "test-subscription-001"
 private typealias PulsarProducer = Producer<SensorReading>
 private typealias PulsarConsumer = Consumer<SensorReading>
 
-/**
- * see: https://github.com/apache/pulsar/blob/master/pulsar-broker/src/test/java/org/apache/pulsar/client/api/SimpleSchemaTest.java
- */
 data class SensorReading(val temperature: Float)
 
 object App {
@@ -29,7 +26,7 @@ object App {
     }
 
     private val producer1: PulsarProducer by lazy {
-        client.newProducer(Schema.AVRO(SensorReading::class.java))
+        client.newProducer(JSONSchema.of(SensorReading::class.java))
                 .topic(TOPIC_NAME)
                 .compressionType(CompressionType.LZ4)
                 .create()

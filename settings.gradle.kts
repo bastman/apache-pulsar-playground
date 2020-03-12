@@ -35,3 +35,5 @@ include("examples:avro")
 findProject(":examples:avro")?.name = "avro"
 include("examples:quickstart")
 findProject(":examples:quickstart")?.name = "quickstart"
+include("examples:jsonschema")
+findProject(":examples:jsonschema")?.name = "jsonschema"
