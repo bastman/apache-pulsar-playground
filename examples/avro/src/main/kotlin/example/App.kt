@@ -28,11 +28,21 @@ object App {
                 .build()
     }
 
+    private val schema = Schema.AVRO(SensorReading::class.java)
+
     private val producer1: PulsarProducer by lazy {
-        client.newProducer(Schema.AVRO(SensorReading::class.java))
+        client.newProducer(schema)
                 .topic(TOPIC_NAME)
                 .compressionType(CompressionType.LZ4)
                 .create()
+    }
+
+    private val consumer1: PulsarConsumer by lazy {
+        client.newConsumer(schema)
+                .topic(TOPIC_NAME)
+                .subscriptionType(SubscriptionType.Shared)
+                .subscriptionName(SUBSCRIPTION_NAME)
+                .subscribe()
     }
 
 
@@ -42,6 +52,8 @@ object App {
         launchProducerJob(producer1)
         println("producer job launched.")
 
+        launchConsumerJob(consumer1)
+        println("consumer job launched.")
 
         println("${this::class.qualifiedName}.run(): done.")
     }
@@ -64,6 +76,23 @@ object App {
 
                 println("produce: IDLE ...")
                 delay(Duration.ofSeconds(1).toMillis())
+            }
+        }
+    }
+
+    private fun launchConsumerJob(consumer: PulsarConsumer): Job = runBlocking {
+        GlobalScope.launch {
+            while (isActive) {
+                // Wait for a message
+                println("receive() from: $SERVICE_URL/$TOPIC_NAME ...")
+                val msg = consumer.receive()
+                println("received ${msg.messageId}")
+                val content = msg.value
+                println("Message received: $content")
+
+                // Acknowledge the message so that it can be deleted by the message broker
+                consumer.acknowledge(msg)
+                println("Ack sent.")
             }
         }
     }
