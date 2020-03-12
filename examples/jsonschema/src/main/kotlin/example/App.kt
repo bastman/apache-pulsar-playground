@@ -56,7 +56,7 @@ object App {
         launchProducerJob(producer1)
         println("producer job launched.")
 
-        launchConsumerJob(consumer1)
+        //launchConsumerJob(consumer1)
         println("consumer job launched.")
 
         println("${this::class.qualifiedName}.run(): done.")
@@ -65,6 +65,7 @@ object App {
 
     private fun launchProducerJob(producer: PulsarProducer): Job = runBlocking {
         GlobalScope.launch {
+            println("STARTING PRODUCER LOOP")
             while (isActive) {
                 println("produce -> $SERVICE_URL/$TOPIC_NAME ...")
                 (1..5).forEach { i: Int ->
@@ -74,8 +75,16 @@ object App {
                     //.deliverAfter(5, TimeUnit.SECONDS)
                     //.deliverAt((Instant.now() + Duration.ofDays(1)).epochSecond)
 
-                    val messageId: MessageId = msg.send()
-                    println("sent message. $messageId")
+                    try {
+                        val messageId: MessageId = msg.send()
+                        println("sent message. $messageId")
+                    }catch (e:Exception) {
+                        println("PRODUCER FAILED: ${e.message}")
+                        // The following exception is thrown when creating the above producer, which specifies an incompatible schema:
+                        // org.apache.pulsar.client.api.PulsarClientException$IncompatibleSchemaException: org.apache.pulsar.broker.service.schema.exceptions.IncompatibleSchemaException: Incompatible schema used
+
+                    }
+
                 }
 
                 println("produce: IDLE ...")
@@ -87,17 +96,25 @@ object App {
 
     private fun launchConsumerJob(consumer: PulsarConsumer): Job = runBlocking {
         GlobalScope.launch {
+            println("STARTING CONSUMER LOOP")
             while (isActive) {
                 // Wait for a message
                 println("receive() from: $SERVICE_URL/$TOPIC_NAME ...")
                 val msg = consumer.receive()
-                println("received ${msg.messageId}")
-                val content = msg.value
-                println("Message received: $content")
+                try {
+                    println("received ${msg.messageId}")
+                    val content = msg.value
+                    println("Message received: $content")
 
-                // Acknowledge the message so that it can be deleted by the message broker
-                consumer.acknowledge(msg)
-                println("Ack sent.")
+                    // Acknowledge the message so that it can be deleted by the message broker
+                    consumer.acknowledge(msg)
+                    println("Ack sent.")
+                }catch (e:Exception) {
+                    println(e)
+                    // Message failed to process, redeliver later
+                    consumer.negativeAcknowledge(msg)
+                }
+
             }
         }
     }
