@@ -16,6 +16,7 @@ pluginManagement {
 
     plugins {
         kotlin("jvm") version kotlinVersion
+        id("tanvd.kosogor") version "1.0.7"
     }
 
     resolutionStrategy {

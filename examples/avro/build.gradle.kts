@@ -6,7 +6,7 @@
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") apply true
 
     // Apply the application plugin to add support for building a CLI application.
     application
