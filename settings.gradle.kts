@@ -8,3 +8,24 @@
  */
 
 rootProject.name = "apache-pulsar-playground"
+include("hello-pulsar")
+
+
+pluginManagement {
+    // see: https://github.com/ilya40umov/KotLink/blob/master/settings.gradle.kts
+
+    val kotlinVersion = "1.3.61"
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if(requested.id.id.startsWith("org.jetbrains.kotlin")) {
+                useVersion(kotlinVersion)
+            }
+        }
+    }
+}
+
