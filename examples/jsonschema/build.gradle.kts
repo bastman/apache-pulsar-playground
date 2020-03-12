@@ -27,6 +27,16 @@ dependencies {
     val pulsarVersion="2.5.0"
     implementation("org.apache.pulsar:pulsar-client:$pulsarVersion")
 
+    // jackson
+    val jacksonVersion =  "2.10.1"
+    implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-modules-java8:$jacksonVersion")
+    implementation( "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation( "com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
+    implementation( "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
+    implementation( "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // test
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
